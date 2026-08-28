@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+<title>
+Ship Hydrostatic Calculator
+</title>
+
+<script
+src="https://cdn.plot.ly/plotly-2.35.2.min.js">
+</script>
+
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    background: #eef2f5;
+
+    color: #222;
+}
+
+.container {
+
+    max-width: 1600px;
+
+    margin: 25px auto;
+
+    background: white;
+
+    padding: 30px;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 4px 20px
+        rgba(0,0,0,0.12);
+}
+
+h1 {
+
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+h2 {
+
+    margin-top: 35px;
+
+    border-bottom:
+        2px solid #ddd;
+
+    padding-bottom: 8px;
+}
+
+
+/* ============================================================
+   UNIT SYSTEM
+   ============================================================ */
+
+.unit-selector {
+
+    background: #f3f4f6;
+
+    border:
+        1px solid #d1d5db;
+
+    border-radius: 10px;
+
+    padding: 18px;
+
+    margin-bottom: 25px;
+}
+
+.unit-selector label {
+
+    font-weight: bold;
+
+    margin-right: 15px;
+}
+
+.unit-selector select {
+
+    padding: 10px 14px;
+
+    border:
+        1px solid #aaa;
+
+    border-radius: 6px;
+
+    font-size: 16px;
+}
+
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+
+.inputs {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 15px;
+}
+
+.input-group {
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+.input-group label {
+
+    font-weight: bold;
+
+    margin-bottom: 6px;
+}
+
+input {
+
+    padding: 10px;
+
+    border:
+        1px solid #bbb;
+
+    border-radius: 6px;
+
+    font-size: 15px;
+}
+
+
+/* ============================================================
+   BUTTON
+   ============================================================ */
+
+button {
+
+    display: block;
+
+    margin: 20px auto;
+
+    padding: 12px 28px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #1f2937;
+
+    color: white;
+
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+button:hover {
+
+    background: #374151;
+}
+
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+
+.table-container {
+
+    overflow-x: auto;
+}
+
+.offset-table {
+
+    border-collapse:
+        collapse;
+
+    width: 100%;
+
+    min-width: 950px;
+}
+
+.offset-table th,
+.offset-table td {
+
+    border:
+        1px solid #ccc;
+
+    padding: 7px;
+
+    text-align: center;
+}
+
+.offset-table th {
+
+    background: #e5e7eb;
+}
+
+.offset-table input {
+
+    width: 90px;
+
+    text-align: center;
+}
+
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+
+#results {
+
+    display: none;
+}
+
+.summary {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 15px;
+}
+
+.summary-box {
+
+    background: #f3f4f6;
+
+    border:
+        1px solid #ddd;
+
+    border-radius: 8px;
+
+    padding: 15px;
+}
+
+.summary-box strong {
+
+    display: block;
+
+    font-size: 13px;
+
+    color: #666;
+}
+
+.summary-box span {
+
+    display: block;
+
+    font-size: 19px;
+
+    font-weight: bold;
+
+    margin-top: 6px;
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+#error {
+
+    display: none;
+
+    background: #fee2e2;
+
+    border:
+        1px solid #ef4444;
+
+    color: #991b1b;
+
+    padding: 15px;
+
+    border-radius: 7px;
+
+    margin-top: 15px;
+}
+
+
+/* ============================================================
+   WATERLINE SLIDER
+   ============================================================ */
+
+.draft-control {
+
+    background: #f3f4f6;
+
+    border:
+        1px solid #ddd;
+
+    border-radius: 10px;
+
+    padding: 20px;
+
+    margin-top: 20px;
+}
+
+#draftSlider {
+
+    width: 100%;
+}
+
+#selectedDraft {
+
+    text-align: center;
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    margin-top: 10px;
+}
+
+
+/* ============================================================
+   3D HULL
+   ============================================================ */
+
+#hull3d {
+
+    width: 100%;
+
+    height: 700px;
+}
+
+
+/* ============================================================
+   DRAWINGS
+   ============================================================ */
+
+.drawing-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 20px;
+}
+
+.drawing {
+
+    border:
+        1px solid #ccc;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.drawing-title {
+
+    background: #e5e7eb;
+
+    padding: 12px;
+
+    text-align: center;
+
+    font-weight: bold;
+}
+
+.plot {
+
+    height: 500px;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media(max-width: 900px) {
+
+    .inputs {
+
+        grid-template-columns:
+            1fr;
+    }
+
+    .summary {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .drawing-grid {
+
+        grid-template-columns:
+            1fr;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1>
+🚢 Ship Hydrostatic Calculator
+</h1>
+
+
+<!-- ============================================================
+     UNIT SELECTOR
+     ============================================================ -->
+
+<div class="unit-selector">
+
+<label for="unit_system">
+Unit System:
+</label>
+
+<select
+    id="unit_system"
+    onchange="updateUnits()">
+
+<option value="SI">
+SI — Metric
+</option>
+
+<option value="FPS">
+FPS — Imperial
+</option>
+
+</select>
+
+</div>
+
+
+<!-- ============================================================
+     SHIP INFORMATION
+     ============================================================ -->
+
+<h2>
+Ship Information
+</h2>
+
+
+<div class="inputs">
+
+
+<div class="input-group">
+
+<label>
+Vessel Name
+</label>
+
+<input
+    type="text"
+    id="vessel_name"
+    value="MV Yangon">
+
+</div>
+
+
+<div class="input-group">
+
+<label id="lppLabel">
+LPP (m)
+</label>
+
+<input
+    type="number"
+    id="lpp"
+    value="120"
+    step="0.01">
+
+</div>
+
+
+<div class="input-group">
+
+<label id="densityLabel">
+Density (t/m³)
+</label>
+
+<input
+    type="number"
+    id="density"
+    value="1.025"
+    step="0.001">
+
+</div>
+
+
+<div class="input-group">
+
+<label>
+Number of Stations
+</label>
+
+<input
+    type="number"
+    id="stations"
+    value="7"
+    min="3"
+    step="2">
+
+</div>
+
+
+<div class="input-group">
+
+<label>
+Number of Waterlines
+</label>
+
+<input
+    type="number"
+    id="waterlines"
+    value="6"
+    min="2">
+
+</div>
+
+
+</div>
+
+
+<!-- ============================================================
+     WATERLINES
+     ============================================================ -->
+
+<h2>
+Waterlines & Hull Offsets
+</h2>
+
+
+<p>
+
+<strong>
+Important:
+</strong>
+
+Waterlines can be <strong>odd or even</strong>.
+
+Only the number of stations must be odd.
+
+</p>
+
+
+<button
+onclick="createTable()">
+
+Create / Rebuild Offset Table
+
+</button>
+
+
+<div
+id="offset-container"
+class="table-container">
+
+</div>
+
+
+<button
+onclick="calculate()">
+
+Calculate Hydrostatics
+
+</button>
+
+
+<div
+id="error">
+</div>
+
+
+<!-- ============================================================
+     RESULTS
+     ============================================================ -->
+
+<div id="results">
+
+
+<h2>
+Hydrostatic Particulars
+</h2>
+
+
+<div
+id="summary"
+class="summary">
+</div>
+
+
+<h2>
+Hydrostatic Table
+</h2>
+
+
+<div
+id="result-table"
+class="table-container">
+</div>
+
+
+<!-- ============================================================
+     WATERLINE VISUALIZATION
+     ============================================================ -->
+
+<h2>
+🌊 Waterline Visualization
+</h2>
+
+
+<div
+class="draft-control">
+
+
+<input
+type="range"
+id="draftSlider"
+min="0"
+max="0"
+value="0"
+step="1"
+oninput="updateAllViews()">
+
+
+<div id="selectedDraft">
+
+Selected Waterline: -
+
+</div>
+
+
+</div>
+
+
+<!-- ============================================================
+     3D HULL
+     ============================================================ -->
+
+<h2>
+🚢 3D Hull Visualization
+</h2>
+
+
+<div id="hull3d"></div>
+
+
+<!-- ============================================================
+     LINES PLAN
+     ============================================================ -->
+
+<h2>
+📐 Lines Plan
+</h2>
+
+
+<div class="drawing-grid">
+
+
+<div class="drawing">
+
+<div class="drawing-title">
+Body Plan
+</div>
+
+<div
+id="bodyPlan"
+class="plot">
+</div>
+
+</div>
+
+
+<div class="drawing">
+
+<div class="drawing-title">
+Half-Breadth Plan
+</div>
+
+<div
+id="halfBreadthPlan"
+class="plot">
+</div>
+
+</div>
+
+
+<div class="drawing">
+
+<div class="drawing-title">
+Profile / Sheer Plan
+</div>
+
+<div
+id="profilePlan"
+class="plot">
+</div>
+
+</div>
+
+
+<div class="drawing">
+
+<div class="drawing-title">
+Waterplane
+</div>
+
+<div
+id="waterplane"
+class="plot">
+</div>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<script>
+
+
+// ============================================================
+// GLOBAL DATA
+// ============================================================
+
+let hydroData = null;
+
+
+// ============================================================
+// UNIT LABELS
+// ============================================================
+
+function updateUnits() {
+
+
+    const system =
+        document.getElementById(
+            "unit_system"
+        ).value;
+
+
+    const lppLabel =
+        document.getElementById(
+            "lppLabel"
+        );
+
+
+    const densityLabel =
+        document.getElementById(
+            "densityLabel"
+        );
+
+
+    const lppInput =
+        document.getElementById(
+            "lpp"
+        );
+
+
+    const densityInput =
+        document.getElementById(
+            "density"
+        );
+
+
+    if (system === "SI") {
+
+        lppLabel.textContent =
+            "LPP (m)";
+
+        densityLabel.textContent =
+            "Density (t/m³)";
+
+        // Only change defaults if switching
+        // from the original FPS default.
+
+        lppInput.placeholder =
+            "metres";
+
+        densityInput.placeholder =
+            "t/m³";
+
+    }
+
+    else {
+
+        lppLabel.textContent =
+            "LPP (ft)";
+
+        densityLabel.textContent =
+            "Density (lb/ft³)";
+
+        lppInput.placeholder =
+            "feet";
+
+        densityInput.placeholder =
+            "lb/ft³";
+
+    }
+
+
+    updateTableUnitLabels();
+
+}
+
+
+// ============================================================
+// UPDATE TABLE LABELS
+// ============================================================
+
+function updateTableUnitLabels() {
+
+
+    const system =
+        document.getElementById(
+            "unit_system"
+        ).value;
+
+
+    document
+        .querySelectorAll(
+            ".draft-unit"
+        )
+        .forEach(
+            element => {
+
+                element.textContent =
+                    system === "SI"
+                    ? "(m)"
+                    : "(ft)";
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            ".offset-unit"
+        )
+        .forEach(
+            element => {
+
+                element.textContent =
+                    system === "SI"
+                    ? "(m)"
+                    : "(ft)";
+
+            }
+        );
+
+}
+
+
+// ============================================================
+// CREATE OFFSET TABLE
+// ============================================================
+
+function createTable() {
+
+
+    const stations =
+        parseInt(
+            document.getElementById(
+                "stations"
+            ).value
+        );
+
+
+    const waterlines =
+        parseInt(
+            document.getElementById(
+                "waterlines"
+            ).value
+        );
+
+
+    if (
+        !stations ||
+        !waterlines
+    ) {
+
+        showError(
+            "Please enter stations and waterlines."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        stations % 2 === 0
+    ) {
+
+        showError(
+            "Number of stations must be odd."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        waterlines < 2
+    ) {
+
+        showError(
+            "At least 2 waterlines are required."
+        );
+
+        return;
+
+    }
+
+
+    hideError();
+
+
+    const system =
+        document.getElementById(
+            "unit_system"
+        ).value;
+
+
+    const lengthUnit =
+        system === "SI"
+        ? "m"
+        : "ft";
+
+
+    let html = `
+
+    <table class="offset-table">
+
+    <thead>
+
+    <tr>
+
+        <th>
+            Waterline
+        </th>
+
+        <th>
+            Draft
+            <span class="draft-unit">
+                (${lengthUnit})
+            </span>
+        </th>
+
+    `;
+
+
+    for (
+        let s = 0;
+        s < stations;
+        s++
+    ) {
+
+        html += `
+
+        <th>
+            Station ${s}
+            <br>
+            <span class="offset-unit">
+                (${lengthUnit})
+            </span>
+        </th>
+
+        `;
+
+    }
+
+
+    html += `
+
+    </tr>
+
+    </thead>
+
+    <tbody>
+
+    `;
+
+
+    for (
+        let w = 0;
+        w < waterlines;
+        w++
+    ) {
+
+
+        html += `
+
+        <tr>
+
+            <td>
+                WL ${w}
+            </td>
+
+            <td>
+
+                <input
+                    type="number"
+                    class="draft"
+                    value="${w}"
+                    step="0.01">
+
+            </td>
+
+        `;
+
+
+        for (
+            let s = 0;
+            s < stations;
+            s++
+        ) {
+
+            html += `
+
+            <td>
+
+                <input
+                    type="number"
+                    class="offset"
+                    value="0"
+                    step="0.001">
+
+            </td>
+
+            `;
+
+        }
+
+
+        html += `
+
+        </tr>
+
+        `;
+
+    }
+
+
+    html += `
+
+    </tbody>
+
+    </table>
+
+    `;
+
+
+    document.getElementById(
+        "offset-container"
+    ).innerHTML =
+        html;
+
+}
+
+
+// ============================================================
+// GET TABLE DATA
+// ============================================================
+
+function getTableData() {
+
+
+    const stations =
+        parseInt(
+            document.getElementById(
+                "stations"
+            ).value
+        );
+
+
+    const draftInputs =
+        document.querySelectorAll(
+            ".draft"
+        );
+
+
+    const offsetInputs =
+        document.querySelectorAll(
+            ".offset"
+        );
+
+
+    const drafts = [];
+
+    const offsets = [];
+
+
+    draftInputs.forEach(
+        input => {
+
+            drafts.push(
+                parseFloat(
+                    input.value
+                )
+            );
+
+        }
+    );
+
+
+    let index = 0;
+
+
+    for (
+        let w = 0;
+        w < drafts.length;
+        w++
+    ) {
+
+
+        const row = [];
+
+
+        for (
+            let s = 0;
+            s < stations;
+            s++
+        ) {
+
+
+            row.push(
+
+                parseFloat(
+                    offsetInputs[
+                        index
+                    ].value
+                )
+
+            );
+
+
+            index++;
+
+        }
+
+
+        offsets.push(row);
+
+    }
+
+
+    return {
+
+        drafts:
+            drafts,
+
+        offsets:
+            offsets
+
+    };
+
+}
+
+
+// ============================================================
+// CALCULATE
+// ============================================================
+
+async function calculate() {
+
+
+    hideError();
+
+
+    const vesselName =
+        document.getElementById(
+            "vessel_name"
+        ).value;
+
+
+    const unitSystem =
+        document.getElementById(
+            "unit_system"
+        ).value;
+
+
+    const lpp =
+        parseFloat(
+            document.getElementById(
+                "lpp"
+            ).value
+        );
+
+
+    const density =
+        parseFloat(
+            document.getElementById(
+                "density"
+            ).value
+        );
+
+
+    const stations =
+        parseInt(
+            document.getElementById(
+                "stations"
+            ).value
+        );
+
+
+    const table =
+        getTableData();
+
+
+    if (
+        table.drafts.length < 2
+    ) {
+
+        showError(
+            "Please create the offset table first."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        isNaN(lpp) ||
+        lpp <= 0
+    ) {
+
+        showError(
+            "Please enter a valid LPP."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        isNaN(density) ||
+        density <= 0
+    ) {
+
+        showError(
+            "Please enter a valid density."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        table.drafts.some(
+            value =>
+                isNaN(value)
+        )
+    ) {
+
+        showError(
+            "One or more draft values are invalid."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        table.offsets.some(
+            row =>
+                row.some(
+                    value =>
+                        isNaN(value)
+                )
+        )
+    ) {
+
+        showError(
+            "One or more half-breadth values are invalid."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/calculate",
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            vessel_name:
+                                vesselName,
+
+                            unit_system:
+                                unitSystem,
+
+                            lpp:
+                                lpp,
+
+                            density:
+                                density,
+
+                            stations:
+                                stations,
+
+                            drafts:
+                                table.drafts,
+
+                            offsets:
+                                table.offsets
+
+                        })
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+
+            showError(
+                result.error ||
+                "Calculation failed."
+            );
+
+            return;
+
+        }
+
+
+        hydroData =
+            result;
+
+
+        displayResults(
+            result
+        );
+
+
+        drawHull(
+            result
+        );
+
+
+        setupSlider(
+            result
+        );
+
+
+        updateAllViews();
+
+    }
+
+    catch(error) {
+
+        showError(
+            "Could not connect to the Python server: "
+            +
+            error.message
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// DISPLAY RESULTS
+// ============================================================
+
+function displayResults(
+    data
+) {
+
+
+    document.getElementById(
+        "results"
+    ).style.display =
+        "block";
+
+
+    const final =
+        data.results[
+            data.results.length - 1
+        ];
+
+
+    const lengthUnit =
+        data.unit_system === "SI"
+        ? "m"
+        : "ft";
+
+
+    const areaUnit =
+        data.unit_system === "SI"
+        ? "m²"
+        : "ft²";
+
+
+    const volumeUnit =
+        data.unit_system === "SI"
+        ? "m³"
+        : "ft³";
+
+
+    const displacementUnit =
+        data.unit_system === "SI"
+        ? "t"
+        : "LT";
+
+
+    const tpcUnit =
+        data.unit_system === "SI"
+        ? "t/cm"
+        : "LT/in";
+
+
+    const densityUnit =
+        data.unit_system === "SI"
+        ? "t/m³"
+        : "lb/ft³";
+
+
+    document.getElementById(
+        "summary"
+    ).innerHTML = `
+
+        <div class="summary-box">
+
+            <strong>
+                Vessel
+            </strong>
+
+            <span>
+                ${data.vessel_name}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <strong>
+                Unit System
+            </strong>
+
+            <span>
+                ${data.unit_system}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <strong>
+                LPP
+            </strong>
+
+            <span>
+                ${data.lpp.toFixed(3)}
+                ${lengthUnit}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <strong>
+                Density
+            </strong>
+
+            <span>
+                ${data.density.toFixed(3)}
+                ${densityUnit}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <strong>
+                Stations
+            </strong>
+
+            <span>
+                ${data.stations}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <strong>
+                Waterlines
+            </strong>
+
+            <span>
+                ${data.waterlines}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <strong>
+                Final Draft
+            </strong>
+
+            <span>
+                ${final.draft.toFixed(3)}
+                ${lengthUnit}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <strong>
+                Volume
+            </strong>
+
+            <span>
+                ${final.volume.toFixed(3)}
+                ${volumeUnit}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <strong>
+                Displacement
+            </strong>
+
+            <span>
+                ${final.displacement.toFixed(3)}
+                ${displacementUnit}
+            </span>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <strong>
+                KM
+            </strong>
+
+            <span>
+                ${final.km.toFixed(3)}
+                ${lengthUnit}
+            </span>
+
+        </div>
+
+    `;
+
+
+    // ========================================================
+    // HYDROSTATIC TABLE
+    // ========================================================
+
+    let html = `
+
+    <table class="offset-table">
+
+    <thead>
+
+    <tr>
+
+        <th>
+            Draft (${lengthUnit})
+        </th>
+
+        <th>
+            Volume (${volumeUnit})
+        </th>
+
+        <th>
+            Displacement (${displacementUnit})
+        </th>
+
+        <th>
+            Aw (${areaUnit})
+        </th>
+
+        <th>
+            TPC (${tpcUnit})
+        </th>
+
+        <th>
+            KB (${lengthUnit})
+        </th>
+
+        <th>
+            BM (${lengthUnit})
+        </th>
+
+        <th>
+            KM (${lengthUnit})
+        </th>
+
+        <th>
+            LCB (${lengthUnit})
+        </th>
+
+        <th>
+            LCF (${lengthUnit})
+        </th>
+
+        <th>
+            Cb
+        </th>
+
+    </tr>
+
+    </thead>
+
+    <tbody>
+
+    `;
+
+
+    data.results.forEach(
+        row => {
+
+            html += `
+
+            <tr>
+
+                <td>
+                    ${row.draft.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.volume.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.displacement.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.area.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.tpc.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.kb.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.bm.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.km.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.lcb.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.lcf.toFixed(3)}
+                </td>
+
+                <td>
+                    ${row.cb.toFixed(4)}
+                </td>
+
+            </tr>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+    </tbody>
+
+    </table>
+
+    `;
+
+
+    document.getElementById(
+        "result-table"
+    ).innerHTML =
+        html;
+
+}
+
+
+// ============================================================
+// SLIDER
+// ============================================================
+
+function setupSlider(
+    data
+) {
+
+
+    const slider =
+        document.getElementById(
+            "draftSlider"
+        );
+
+
+    slider.min =
+        0;
+
+
+    slider.max =
+        data.drafts.length - 1;
+
+
+    slider.value =
+        data.drafts.length - 1;
+
+}
+
+
+// ============================================================
+// UPDATE VIEWS
+// ============================================================
+
+function updateAllViews() {
+
+
+    if (!hydroData) {
+
+        return;
+
+    }
+
+
+    const index =
+        parseInt(
+            document.getElementById(
+                "draftSlider"
+            ).value
+        );
+
+
+    const draft =
+        hydroData.drafts[index];
+
+
+    const unit =
+        hydroData.unit_system === "SI"
+        ? "m"
+        : "ft";
+
+
+    document.getElementById(
+        "selectedDraft"
+    ).textContent =
+
+        "Selected Waterline: WL "
+        +
+        index
+        +
+        " — Draft "
+        +
+        draft.toFixed(2)
+        +
+        " "
+        +
+        unit;
+
+
+    drawBodyPlan(
+        hydroData,
+        index
+    );
+
+
+    drawHalfBreadthPlan(
+        hydroData,
+        index
+    );
+
+
+    drawProfilePlan(
+        hydroData,
+        index
+    );
+
+
+    drawWaterplane(
+        hydroData,
+        index
+    );
+
+}
+
+
+// ============================================================
+// 3D HULL
+// ============================================================
+
+function drawHull(
+    data
+) {
+
+
+    const stations =
+        data.stations;
+
+
+    const drafts =
+        data.drafts;
+
+
+    const offsets =
+        data.offsets;
+
+
+    const x =
+        data.x_positions;
+
+
+    const portX = [];
+    const portY = [];
+    const portZ = [];
+
+
+    const starX = [];
+    const starY = [];
+    const starZ = [];
+
+
+    for (
+        let w = 0;
+        w < drafts.length;
+        w++
+    ) {
+
+
+        const px = [];
+        const py = [];
+        const pz = [];
+
+
+        const sx = [];
+        const sy = [];
+        const sz = [];
+
+
+        for (
+            let s = 0;
+            s < stations;
+            s++
+        ) {
+
+            px.push(
+                x[s]
+            );
+
+            py.push(
+                -offsets[w][s]
+            );
+
+            pz.push(
+                drafts[w]
+            );
+
+
+            sx.push(
+                x[s]
+            );
+
+            sy.push(
+                offsets[w][s]
+            );
+
+            sz.push(
+                drafts[w]
+            );
+
+        }
+
+
+        portX.push(px);
+        portY.push(py);
+        portZ.push(pz);
+
+
+        starX.push(sx);
+        starY.push(sy);
+        starZ.push(sz);
+
+    }
+
+
+    Plotly.newPlot(
+
+        "hull3d",
+
+        [
+
+            {
+
+                type:
+                    "surface",
+
+                x:
+                    portX,
+
+                y:
+                    portY,
+
+                z:
+                    portZ,
+
+                showscale:
+                    false,
+
+                name:
+                    "Port"
+
+            },
+
+
+            {
+
+                type:
+                    "surface",
+
+                x:
+                    starX,
+
+                y:
+                    starY,
+
+                z:
+                    starZ,
+
+                showscale:
+                    false,
+
+                name:
+                    "Starboard"
+
+            }
+
+        ],
+
+        {
+
+            title:
+                data.vessel_name
+                +
+                " — 3D Hull",
+
+            scene: {
+
+                xaxis: {
+
+                    title:
+                        "Length"
+
+                },
+
+                yaxis: {
+
+                    title:
+                        "Breadth"
+
+                },
+
+                zaxis: {
+
+                    title:
+                        "Draft"
+
+                },
+
+                aspectmode:
+                    "data"
+
+            },
+
+            margin: {
+
+                l: 0,
+
+                r: 0,
+
+                b: 0,
+
+                t: 50
+
+            }
+
+        },
+
+        {
+
+            responsive:
+                true
+
+        }
+
+    );
+
+}
+
+
+// ============================================================
+// BODY PLAN
+// ============================================================
+
+function drawBodyPlan(
+    data,
+    index
+) {
+
+
+    const traces = [];
+
+
+    for (
+        let s = 0;
+        s < data.stations;
+        s++
+    ) {
+
+
+        const rightX = [];
+        const rightY = [];
+
+
+        const leftX = [];
+        const leftY = [];
+
+
+        for (
+            let w = 0;
+            w <= index;
+            w++
+        ) {
+
+
+            rightX.push(
+                data.offsets[w][s]
+            );
+
+            rightY.push(
+                data.drafts[w]
+            );
+
+
+            leftX.push(
+                -data.offsets[w][s]
+            );
+
+            leftY.push(
+                data.drafts[w]
+            );
+
+        }
+
+
+        traces.push({
+
+            type:
+                "scatter",
+
+            mode:
+                "lines+markers",
+
+            x:
+                rightX,
+
+            y:
+                rightY,
+
+            name:
+                "Station " + s
+
+        });
+
+
+        traces.push({
+
+            type:
+                "scatter",
+
+            mode:
+                "lines",
+
+            x:
+                leftX,
+
+            y:
+                leftY,
+
+            showlegend:
+                false
+
+        });
+
+    }
+
+
+    Plotly.newPlot(
+
+        "bodyPlan",
+
+        traces,
+
+        {
+
+            title:
+                "Body Plan",
+
+            xaxis: {
+
+                title:
+                    "Breadth"
+
+            },
+
+            yaxis: {
+
+                title:
+                    "Draft"
+
+            }
+
+        },
+
+        {
+
+            responsive:
+                true
+
+        }
+
+    );
+
+}
+
+
+// ============================================================
+// HALF BREADTH PLAN
+// ============================================================
+
+function drawHalfBreadthPlan(
+    data,
+    index
+) {
+
+
+    const traces = [];
+
+
+    for (
+        let w = 0;
+        w <= index;
+        w++
+    ) {
+
+
+        traces.push({
+
+            type:
+                "scatter",
+
+            mode:
+                "lines+markers",
+
+            x:
+                data.x_positions,
+
+            y:
+                data.offsets[w],
+
+            name:
+                "WL "
+                +
+                w
+                +
+                " — "
+                +
+                data.drafts[w].toFixed(2)
+
+        });
+
+    }
+
+
+    Plotly.newPlot(
+
+        "halfBreadthPlan",
+
+        traces,
+
+        {
+
+            title:
+                "Half-Breadth Plan",
+
+            xaxis: {
+
+                title:
+                    "Length"
+
+            },
+
+            yaxis: {
+
+                title:
+                    "Half Breadth"
+
+            }
+
+        },
+
+        {
+
+            responsive:
+                true
+
+        }
+
+    );
+
+}
+
+
+// ============================================================
+// PROFILE PLAN
+// ============================================================
+
+function drawProfilePlan(
+    data,
+    index
+) {
+
+
+    const traces = [];
+
+
+    for (
+        let w = 0;
+        w <= index;
+        w++
+    ) {
+
+
+        traces.push({
+
+            type:
+                "scatter",
+
+            mode:
+                "lines",
+
+            x: [
+
+                data.x_positions[0],
+
+                data.x_positions[
+                    data.x_positions.length - 1
+                ]
+
+            ],
+
+            y: [
+
+                data.drafts[w],
+
+                data.drafts[w]
+
+            ],
+
+            name:
+                "WL " + w
+
+        });
+
+    }
+
+
+    Plotly.newPlot(
+
+        "profilePlan",
+
+        traces,
+
+        {
+
+            title:
+                "Profile / Sheer Plan",
+
+            xaxis: {
+
+                title:
+                    "Length"
+
+            },
+
+            yaxis: {
+
+                title:
+                    "Draft"
+
+            }
+
+        },
+
+        {
+
+            responsive:
+                true
+
+        }
+
+    );
+
+}
+
+
+// ============================================================
+// WATERPLANE
+// ============================================================
+
+function drawWaterplane(
+    data,
+    index
+) {
+
+
+    const offsets =
+        data.offsets[index];
+
+
+    const x =
+        data.x_positions;
+
+
+    const px = [];
+    const py = [];
+
+
+    // Starboard
+
+    for (
+        let i = 0;
+        i < x.length;
+        i++
+    ) {
+
+        px.push(
+            x[i]
+        );
+
+        py.push(
+            offsets[i]
+        );
+
+    }
+
+
+    // Port
+
+    for (
+        let i = x.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        px.push(
+            x[i]
+        );
+
+        py.push(
+            -offsets[i]
+        );
+
+    }
+
+
+    px.push(
+        px[0]
+    );
+
+    py.push(
+        py[0]
+    );
+
+
+    Plotly.newPlot(
+
+        "waterplane",
+
+        [
+
+            {
+
+                type:
+                    "scatter",
+
+                mode:
+                    "lines",
+
+                x:
+                    px,
+
+                y:
+                    py,
+
+                fill:
+                    "toself",
+
+                name:
+                    "Waterplane"
+
+            }
+
+        ],
+
+        {
+
+            title:
+                "Waterplane — WL "
+                +
+                index
+                +
+                " — Draft "
+                +
+                data.drafts[index].toFixed(2),
+
+            xaxis: {
+
+                title:
+                    "Length"
+
+            },
+
+            yaxis: {
+
+                title:
+                    "Breadth",
+
+                scaleanchor:
+                    "x"
+
+            }
+
+        },
+
+        {
+
+            responsive:
+                true
+
+        }
+
+    );
+
+}
+
+
+// ============================================================
+// ERROR
+// ============================================================
+
+function showError(
+    message
+) {
+
+    const error =
+        document.getElementById(
+            "error"
+        );
+
+    error.textContent =
+        message;
+
+    error.style.display =
+        "block";
+
+}
+
+
+function hideError() {
+
+    document.getElementById(
+        "error"
+    ).style.display =
+        "none";
+
+}
+
+
+// ============================================================
+// INITIALIZE
+// ============================================================
+
+window.onload = function() {
+
+    updateUnits();
+
+    createTable();
+
+};
+
+</script>
+
+
+</body>
+
+</html>
